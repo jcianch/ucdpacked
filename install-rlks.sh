@@ -1,9 +1,9 @@
 #!/bin/bash
+source /vagrant/parameters.sh
 yum install -y redhat-lsb-core.i686
-
 echo "install RLKS"
-/vagrant/rlks814/InstallerImage_linux_gtk_x86_64/installc -acceptLicense input /vagrant/rlks814/RLKSinstall.rsp -log /tmp/rlks.log
-cat /vagrant/rlks814/server_license.lic >> /opt/IBM/RationalRLKS/config/server_license.lic
+$MEDIA_DIR/rlks814/InstallerImage_linux_gtk_x86_64/installc -acceptLicense input $MEDIA_DIR/rlks814/RLKSinstall.rsp -log /tmp/rlks.log
+cat $MEDIA_DIR/rlks814/server_license.lic >> /opt/IBM/RationalRLKS/config/server_license.lic
 sed -i '/xterm/c\echo\ \$text' /opt/IBM/RationalRLKS/config/server_start_stop.sh
 /opt/IBM/RationalRLKS/config/server_start_stop.sh start
 sleep 5s

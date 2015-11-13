@@ -4,7 +4,7 @@ source /vagrant/parameters.sh
 yum install -y unzip
 # install java
 mkdir -p /opt/IBM/
-cp -R /vagrant/ibm-ucd-patterns-install/web-install/media/server/java /opt/IBM/
+cp -R $MEDIA_DIR/ibm-ucd-patterns-install/web-install/media/server/java /opt/IBM/
 export JAVA_HOME=/opt/IBM/java/jre
 export PATH=$PATH:$JAVA_HOME/bin
 
@@ -26,10 +26,10 @@ CREATE DATABASE ibm_ucd;
 GRANT ALL ON ibm_ucd.* TO 'ibm_ucd'@'%' IDENTIFIED BY 'ibm_ucd' WITH GRANT OPTION; "
 
 # Download the mysql java driver jar and put it into ibm-ucd-install/lib/ext directory
-cp /vagrant/dbjar/mariadb-java-client-1.2.3.jar /vagrant/ibm-ucd-install/lib/ext
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/ibm-ucd-install/lib/ext
 
 # make copy of original properies file
-cp /vagrant/ibm-ucd-install/install.properties /vagrant/ibm-ucd-install/orig-install.properties
+cp $MEDIA_DIR/ibm-ucd-install/install.properties $MEDIA_DIR/ibm-ucd-install/orig-install.properties
 
 # echo per-deployment configurable properties
 # TODO: make these values configurable from options.yml
@@ -51,22 +51,22 @@ install.server.dir=/opt/ibm-ucd/server
 server.jms.mutualAuth=false
 server.initial.password=${MY_UCD_PASSWORD}
 rcl.server.url=27000@${MY_RLKS_IP}
-" >> /vagrant/ibm-ucd-install/install.properties
+" >> $MEDIA_DIR/ibm-ucd-install/install.properties
 
 echo "Installing UCD Server with the following properties:"
-cat /vagrant/ibm-ucd-install/install.properties
-cd /vagrant/ibm-ucd-install/
+cat $MEDIA_DIR/ibm-ucd-install/install.properties
+cd $MEDIA_DIR/ibm-ucd-install/
 ./install-server.sh
 
 # restore the orig-install.properties
-rm /vagrant/ibm-ucd-install/install.properties
-mv /vagrant/ibm-ucd-install/orig-install.properties /vagrant/ibm-ucd-install/install.properties
+rm $MEDIA_DIR/ibm-ucd-install/install.properties
+mv $MEDIA_DIR/ibm-ucd-install/orig-install.properties $MEDIA_DIR/ibm-ucd-install/install.properties
 
 # now start the ucd server
 /opt/ibm-ucd/server/bin/server start
 
 # now install udclient
-unzip -q /vagrant/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
+unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
 
 
 echo ""
@@ -79,7 +79,7 @@ echo ""
 echo ""
 
 # unzip ucdagent install archive to /tmp
-unzip -q /vagrant/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/ibm-ucd-agent.zip -d /tmp
+unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/ibm-ucd-agent.zip -d /tmp
 
 # echo per-deployment configurable properties
 # TODO: make these values configurable from options.yml
@@ -105,7 +105,7 @@ locked/agent.mutual_auth=false
 echo "Installing the UCD Agent with the following properties:"
 cat /tmp/ibm-ucd-agent-install/vagrant-agent-install.properties
 /tmp/ibm-ucd-agent-install/install-agent-from-file.sh /tmp/ibm-ucd-agent-install/vagrant-agent-install.properties
-
+rm -rf /tmp/ibm-ucd-agent-install
 # now start the udagent
 echo "Starting the UCD Agent..."
 /opt/ibm-ucd/agent/bin/agent start
@@ -153,33 +153,33 @@ data=json.load(sys.stdin); print data['token']"`
 echo "Retrieve Auth Token: ${token}"
 
 # add example jke application to UCD
-curl --verbose -u admin:${MY_UCD_PASSWORD}  -s --insecure -F "file=@/vagrant/landscaper/plugins/WebSphere-Liberty-3.641636.zip;type=application/zip" -F "filename=WebSphere-Liberty-3.641636.zip" http://${IPADDRESS}:${MY_UCD_HTTP_PORT}/rest/plugin/automationPlugin
+curl --verbose -u admin:${MY_UCD_PASSWORD}  -s --insecure -F "file=@$MEDIA_DIR/landscaper/plugins/WebSphere-Liberty-3.641636.zip;type=application/zip" -F "filename=WebSphere-Liberty-3.641636.zip" http://${IPADDRESS}:${MY_UCD_HTTP_PORT}/rest/plugin/automationPlugin
 echo Importing MySQL
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent /vagrant/landscaper/mysql/MySQL+Server.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/mysql/deploy-ubuntu.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/mysql/deploy-windows.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/mysql/deploy.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent $MEDIA_DIR/landscaper/mysql/MySQL+Server.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/mysql/deploy-ubuntu.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/mysql/deploy-windows.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/mysql/deploy.json
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createVersion -component "MySQL Server" -name 5.6.22
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component "MySQL Server" -version 5.6.22 -base /vagrant/landscaper/mysql/artifacts/ -exclude .DS_Store
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component "MySQL Server" -version 5.6.22 -base $MEDIA_DIR/landscaper/mysql/artifacts/ -exclude .DS_Store
 echo Importing WAS Liberty
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent /vagrant/landscaper/wlp/WebSphere+Liberty+Profile.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/wlp/open-firewall-port-ubuntu.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/wlp/open-firewall-port-windows.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/wlp/deploy.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent $MEDIA_DIR/landscaper/wlp/WebSphere+Liberty+Profile.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/wlp/open-firewall-port-ubuntu.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/wlp/open-firewall-port-windows.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/wlp/deploy.json
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createVersion -component "WebSphere Liberty Profile" -name 8.5.5.5
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component "WebSphere Liberty Profile" -version 8.5.5.5 -base /vagrant/landscaper/wlp/artifacts/ -exclude .DS_Store
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component "WebSphere Liberty Profile" -version 8.5.5.5 -base $MEDIA_DIR/landscaper/wlp/artifacts/ -exclude .DS_Store
 echo Importing JKE db
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent /vagrant/landscaper/jke/jke.db/jke.db.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/jke/jke.db/deploy.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent $MEDIA_DIR/landscaper/jke/jke.db/jke.db.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/jke/jke.db/deploy.json
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createVersion -component jke.db -name 1.0
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component jke.db -version 1.0 -base /vagrant/landscaper/jke/jke.db/artifacts/ -exclude .DS_Store
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component jke.db -version 1.0 -base $MEDIA_DIR/landscaper/jke/jke.db/artifacts/ -exclude .DS_Store
 echo Importing JKE war
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent /vagrant/landscaper/jke/jke.war/jke.war.json
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess /vagrant/landscaper/jke/jke.war/deploy.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponent $MEDIA_DIR/landscaper/jke/jke.war/jke.war.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createComponentProcess $MEDIA_DIR/landscaper/jke/jke.war/deploy.json
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createVersion -component jke.war -name 1.0
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component jke.war -version 1.0 -base /vagrant/landscaper/jke/jke.war/artifacts/ -exclude .DS_Store
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addVersionFiles -component jke.war -version 1.0 -base $MEDIA_DIR/landscaper/jke/jke.war/artifacts/ -exclude .DS_Store
 echo Importing JKE Application
-/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createApplication /vagrant/landscaper/jke/JKE.json
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token createApplication $MEDIA_DIR/landscaper/jke/JKE.json
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addComponentToApplication -component "MySQL Server" -application JKE
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addComponentToApplication -component "WebSphere Liberty Profile" -application JKE
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addComponentToApplication -component jke.db -application JKE

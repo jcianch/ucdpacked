@@ -74,10 +74,10 @@ CREATE DATABASE ibm_ucdp;
 GRANT ALL ON ibm_ucdp.* TO 'ibm_ucdp'@'%' IDENTIFIED BY 'ibm_ucdp' WITH GRANT OPTION;"
 
 #Install UCDP web designer
-cp /vagrant/dbjar/mariadb-java-client-1.2.3.jar /vagrant/ibm-ucd-patterns-install/web-install/media/server/lib/ext
-chmod 755 /vagrant/ibm-ucd-patterns-install/web-install/install.sh
-chmod 755 /vagrant/ibm-ucd-patterns-install/web-install/gradlew
-cd /vagrant/ibm-ucd-patterns-install/web-install
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/ibm-ucd-patterns-install/web-install/media/server/lib/ext
+#chmod 755 $MEDIA_DIR/ibm-ucd-patterns-install/web-install/install.sh
+chmod 755 $MEDIA_DIR/ibm-ucd-patterns-install/web-install/gradlew
+cd $MEDIA_DIR/ibm-ucd-patterns-install/web-install
 
 export JAVA_OPTS="-Dlicense.accepted=Y \
 -Dinstall.server.dir=/opt/ibm-ucd-patterns \
@@ -100,7 +100,7 @@ export JAVA_OPTS="-Dlicense.accepted=Y \
 ./gradlew -sSq install
 
 # copy mysql-jdbc.jar to tomcat home lib dir
-cp /vagrant/dbjar/mariadb-java-client-1.2.3.jar /opt/ibm-ucd-patterns/opt/tomcat/lib/
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar /opt/ibm-ucd-patterns/opt/tomcat/lib/
 
 /opt/ibm-ucd-patterns/bin/server start
 
@@ -110,14 +110,13 @@ cp /vagrant/dbjar/mariadb-java-client-1.2.3.jar /opt/ibm-ucd-patterns/opt/tomcat
 # update-rc.d ucdp defaults 98
 # service ucdp start
 
-# cp /vagrant/landscaper/ibm-cloud-discovery.conf /etc/
 # cp /vagrant/landscaper/ibmcds /etc/init.d/ibmcds
 # chmod +x /etc/init.d/ibmcds
 # update-rc.d ibmcds defaults 99
 # service ibmcds start
 
 #setup CDS
-cp /vagrant/landscaper/cloud_setting.conf /opt/cloud_setting.conf
+cp $MEDIA_DIR/landscaper/cloud_setting.conf /opt/cloud_setting.conf
 echo export CLOUDDISCOVERYSERVICE_SETTINGS_FILE=/opt/cloud_setting.conf > /etc/profile.d/ibmcds.sh
 export CLOUDDISCOVERYSERVICE_SETTINGS_FILE=/opt/cloud_setting.conf
 /opt/ibm-ucd-patterns/opt/udeploy-patterns-cloud-discovery-service/runserver &
@@ -226,18 +225,18 @@ curl -u ucdpadmin:ucdpadmin  -H 'Content-Type: application/json' -d @cloudAuthor
 http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/${TEAM_ID//\"} -X PUT -o cloudAuthorisation.rsp
 
 
-cp /vagrant/landscaper/tunnel.sh /home/vagrant
+cp $MEDIA_DIR/landscaper/tunnel.sh /home/vagrant
 chmod 755 /home/vagrant/tunnel.sh
 chown vagrant:vagrant /home/vagrant/tunnel.sh
 
-cp /vagrant/landscaper/aws-setup.sh /home/vagrant/aws-setup.sh
+cp $MEDIA_DIR/landscaper/aws-setup.sh /home/vagrant/aws-setup.sh
 chmod 755 /home/vagrant/aws-setup.sh
 chown vagrant:vagrant /home/vagrant/aws-setup.sh
 
-cp /vagrant/landscaper/sl-setup.sh /home/vagrant/sl-setup.sh
+cp $MEDIA_DIR/landscaper/sl-setup.sh /home/vagrant/sl-setup.sh
 chmod 755 /home/vagrant/sl-setup.sh
 chown vagrant:vagrant /home/vagrant/sl-setup.sh
 sleep 60
 
 # Add tutorial content to image
-#cp /vagrant/landscaper/tutorials/jke.js /opt/ibm-ucd-patterns/opt/tomcat/webapps/landscaper/static/6.*/js/tutorial/nls/TutorialContent.js
+#cp $MEDIA_DIR/landscaper/tutorials/jke.js /opt/ibm-ucd-patterns/opt/tomcat/webapps/landscaper/static/6.*/js/tutorial/nls/TutorialContent.js
