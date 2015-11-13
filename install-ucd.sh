@@ -112,7 +112,12 @@ echo "Starting the UCD Agent..."
 
 # now license the ucd server
 echo "Updating UCD Server system configuration..."
-echo '{"artifactAgent": "local"}' >> /tmp/config.json
+cat > /tmp/config.json <<EOF
+{
+	"agentAutoLicense": "true",
+	"artifactAgent": "local"
+}
+EOF
 sleep 30s # give UCD enough time to start up before running this command
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -username admin -password ${MY_UCD_PASSWORD} setSystemConfiguration /tmp/config.json
 
@@ -133,14 +138,6 @@ sleep 30s # give UCD enough time to start up before running this command
 # update-rc.d udagent defaults
 # update-rc.d udagent enable
 
-echo "                                                                               "
-echo "                                                                               "
-echo "###############################################################################"
-echo "## Creating Sample JKE Application in UCD                                    ##"
-echo "## using JAVA_HOME=$JAVA_HOME                                                ##"
-echo "###############################################################################"
-echo "                                                                               "
-echo "                                                                               "
 echo "Requesting new Auth Token from UCD server for UCDP..."
 token=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT}  \
 -username admin \
@@ -151,6 +148,26 @@ token=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_
 "import json; import sys;
 data=json.load(sys.stdin); print data['token']"`
 echo "Retrieve Auth Token: ${token}"
+
+echo "                                                                               "
+echo "                                                                               "
+echo "###############################################################################"
+echo "## Adding Designer agent packages to UCD                                     ##"
+echo "## using JAVA_HOME=$JAVA_HOME                                                ##"
+echo "###############################################################################"
+echo "                                                                               "
+echo "                                                                               "
+$MEDIA_DIR/ibm-ucd-patterns-install/agent-package-install/install-agent-packages.sh -s http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -a $token 
+
+echo "                                                                               "
+echo "                                                                               "
+echo "###############################################################################"
+echo "## Creating Sample JKE Application in UCD                                    ##"
+echo "## using JAVA_HOME=$JAVA_HOME                                                ##"
+echo "###############################################################################"
+echo "                                                                               "
+echo "                                                                               "
+
 
 # add example jke application to UCD
 curl --verbose -u admin:${MY_UCD_PASSWORD}  -s --insecure -F "file=@$MEDIA_DIR/landscaper/plugins/WebSphere-Liberty-3.641636.zip;type=application/zip" -F "filename=WebSphere-Liberty-3.641636.zip" http://${IPADDRESS}:${MY_UCD_HTTP_PORT}/rest/plugin/automationPlugin
