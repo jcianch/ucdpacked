@@ -156,8 +156,9 @@ echo "## Adding Designer agent packages to UCD                                  
 echo "## using JAVA_HOME=$JAVA_HOME                                                ##"
 echo "###############################################################################"
 echo "                                                                               "
-echo "                                                                               "
-$MEDIA_DIR/ibm-ucd-patterns-install/agent-package-install/install-agent-packages.sh -s http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -a $token 
+echo "                                                                               "            
+cd $MEDIA_DIR/ibm-ucd-patterns-install/agent-package-install
+./install-agent-packages.sh -s http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -a $token 
 
 echo "                                                                               "
 echo "                                                                               "
