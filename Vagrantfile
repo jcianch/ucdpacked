@@ -1,0 +1,53 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  if Vagrant.has_plugin?("vagrant-cachier")
+     config.cache.scope = :box # cache at the base box level
+
+     # setup yum cache
+     config.cache.enable :yum
+  else
+     print "vagrant-cachier plugin has not been found."
+     print "You can install it by `vagrant plugin install vagrant-cachier`"
+  end
+  config.vm.define "stackinabox" do |stackinabox|
+
+    # boxes at https://atlas.hashicorp.com/search.
+    stackinabox.vm.box = "puppetlabs/centos-7.0-64-nocm"
+    stackinabox.vm.hostname = "stackinabox"
+    vmware = "vmware_workstation"
+    stackinabox.vm.provider vmware do |vw|
+      # Don't boot with headless mode
+      #vw.gui = true
+
+      vw.vmx["displayName"] = "stackinabox" # sets the name that virtual box will show in it's UI
+      vw.vmx["numvcpus"] = "4" # set number of vcpus
+      vw.vmx["memsize"] = "16384" # set amount of memory allocated vm memory
+      vw.vmx["hypervisor.cpuid.v0"] = "FALSE"
+      vw.vmx["mce.enable"] = "TRUE"
+      vw.vmx["vhv.enable"] = "TRUE" # turn on host hardware virtualization extensions (VT-x|AMD-V)
+    end
+    # Ensure that VMWare Tools recompiles kernel modules
+    # when we update the linux images
+    $fix_vmware_tools_script = <<SCRIPT
+    sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
+    sed -i 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+SCRIPT
+
+    stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
+    stackinabox.vm.provision "shell", name: "setup networking", privileged: true, keep_color: false, path: "networks.sh"
+    stackinabox.vm.provision :reload
+    stackinabox.vm.provision "shell", name: "yum update", privileged: true,   inline: "yum update -y"
+    stackinabox.vm.provision :reload
+    stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
+    stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
+    stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
+    stackinabox.vm.provision :reload
+    stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
+    stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
+    stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+
+  end
+
+end
