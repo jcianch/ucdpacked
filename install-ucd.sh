@@ -203,3 +203,27 @@ echo Importing JKE Application
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addComponentToApplication -component jke.db -application JKE
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addComponentToApplication -component jke.war -application JKE
 
+#Add WLP install dir property
+wlpCompID=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT}  \
+-username admin \
+-password ${MY_UCD_PASSWORD} getComponent \
+-component "WebSphere Liberty Profile" | python -c \
+"import json; import sys;
+data=json.load(sys.stdin); print data['id']"`
+echo "Retrieve Component ID for WLP: ${wlpCompID}"
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addEnvironmentProperty \
+-component ${wlpCompID} -name "liberty.install.dir" -label "liberty.install.dir" required true -default "/opt/was"
+
+#Add WLP install dir property
+warCompID=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT}  \
+-username admin \
+-password ${MY_UCD_PASSWORD} getComponent \
+-component "jke.war" | python -c \
+"import json; import sys;
+data=json.load(sys.stdin); print data['id']"`
+echo "Retrieve Component ID jke.war: ${warCompID}"
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addEnvironmentProperty \
+-component ${warCompID} -name "liberty.install.dir" -label "liberty.install.dir" -required true -default "/opt/was"
+/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addEnvironmentProperty \
+-component ${warCompID} -name "jke.db.host" -label "jke.db.host" -required true -default "localhost"
+
