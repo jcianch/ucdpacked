@@ -214,7 +214,7 @@ echo "Retrieve Component ID for WLP: ${wlpCompID}"
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -authtoken $token addEnvironmentProperty \
 -component ${wlpCompID} -name "liberty.install.dir" -label "liberty.install.dir" required true -default "/opt/was"
 
-#Add WLP install dir property
+#Add WAR install dir and db host property
 warCompID=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT}  \
 -username admin \
 -password ${MY_UCD_PASSWORD} getComponent \
