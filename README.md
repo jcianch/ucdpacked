@@ -1,3 +1,4 @@
+Based off of Tim Pouyer's stackinabox.
 Uses Vagrant to build a VM (tested with VmWare)  with:
 OpenStack (Kilo) using Packstack(see packstack.sh for which modules are enabled)
 Rational License key Server (put license keys in $MEDIA_DIR/rlks814/server_license.lic)
