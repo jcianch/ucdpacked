@@ -1,0 +1,12 @@
+[Unit]
+Description=IBM CLoud Discovery Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/opt/ibm-ucd-patterns/opt/udeploy-patterns-cloud-discovery-service/runserver
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

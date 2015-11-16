@@ -1,0 +1,16 @@
+[Unit]
+Description=UrbanCode Deploy Server
+After=network.target
+Wants=rlks.service
+Before=ucd-agent.service
+
+[Service]
+Type=forking
+PIDFile=/run/ucd_server.pid
+User=root
+ExecStart=/opt/ibm-ucd/server/bin/init/server start
+ExecStop=/opt/ibm-ucd/server/bin/init/server stop
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=UrbanCode Deploy Agent
+After=network.target
+After=ucd-server.service
+Requires=ucd-server.service
+
+[Service]
+Type=forking
+PIDFile=/run/ucd_agent.pid
+User=root
+ExecStart=/opt/ibm-ucd/agent/bin/init/agent start
+ExecStop=/opt/ibm-ucd/agent/bin/init/agent stop
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

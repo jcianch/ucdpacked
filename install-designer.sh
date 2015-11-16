@@ -102,30 +102,28 @@ export JAVA_OPTS="-Dlicense.accepted=Y \
 # copy mysql-jdbc.jar to tomcat home lib dir
 cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar /opt/ibm-ucd-patterns/opt/tomcat/lib/
 
-/opt/ibm-ucd-patterns/bin/server start
-
-#TODO add UCDP and CDS as service
-# cp /opt/ibm-ucd-patterns/bin/server /etc/init.d/ucdp
-# chmod +x /etc/init.d/ucdp
-# update-rc.d ucdp defaults 98
-# service ucdp start
-
-# cp /vagrant/landscaper/ibmcds /etc/init.d/ibmcds
-# chmod +x /etc/init.d/ibmcds
-# update-rc.d ibmcds defaults 99
-# service ibmcds start
+#install UCD Designer as a service
+cp $BASE_DIR/scripts/ucd-designer.service /etc/systemd/system/ucd-designer.service
+systemctl enable ucd-designer.service
+echo "Starting the UCD Design Server..."
+systemctl start ucd-designer.service
 
 #setup CDS
 cp $MEDIA_DIR/landscaper/cloud_setting.conf /opt/cloud_setting.conf
 echo export CLOUDDISCOVERYSERVICE_SETTINGS_FILE=/opt/cloud_setting.conf > /etc/profile.d/ibmcds.sh
 export CLOUDDISCOVERYSERVICE_SETTINGS_FILE=/opt/cloud_setting.conf
-/opt/ibm-ucd-patterns/opt/udeploy-patterns-cloud-discovery-service/runserver &
+
+#install UIBM CLoud Discovery Service as a service
+cp $BASE_DIR/scripts/ibm-cds.service /etc/systemd/system/ibm-cds.service
+systemctl enable ibm-cds.service
+echo "Starting the IBM CLoud Discovery Service..."
+systemctl start ibm-cds.service
 
 
-sleep 60s
+sleep 30s
 # hit landscaper homepage to ensure database setup occurs
 wget -q http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper
-sleep 30s
+sleep 60s
 #Add UCD integration to UCDP System Settings
 cat  > systemSettings.json <<EOF
 {"designerServerUrl":"http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper",

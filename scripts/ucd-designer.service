@@ -1,0 +1,12 @@
+[Unit]
+Description=UrbanCode Deploy Designer
+After=network.target
+
+[Service]
+Type=simple
+Environment='JAVA_HOME="/opt/ibm-ucd-patterns/java/jre"' 'CATALINA_OPTS="-Dlog4j.info -Dlog4j.configuration=log4j.properties"'
+User=root
+ExecStart=/opt/ibm-ucd-patterns/opt/tomcat/bin/catalina.sh run
+
+[Install]
+WantedBy=multi-user.target

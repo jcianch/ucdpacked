@@ -48,4 +48,8 @@ crudini --set /etc/nova/nova.conf libvirt cpu_mode host-passthrough || true
 crudini --set /etc/neutron/dhcp_agent.ini DEFAULT enable_isolated_metadata True || true
 crudini --set /etc/neutron/dhcp_agent.ini DEFAULT enable_metadata_network True || true
 
+#Modify Celimoeter to lower interval to 60 seconds
+sed -i -e 's/interval: 600/interval: 60/g' /etc/ceilometer/pipeline.yaml
+#Modify Nova for telemetry
+crudini --set /etc/nova/nova.conf DEFAULT notification_driver messagingv2 || true
 

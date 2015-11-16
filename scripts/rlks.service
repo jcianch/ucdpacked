@@ -1,0 +1,13 @@
+[Unit]
+Description=Rational License Key Server
+After=network.target
+
+[Service]
+Type=forking
+User=root
+ExecStart=/opt/IBM/RationalRLKS/config/start_lmgrd start
+ExecStop=/opt/IBM/RationalRLKS/config/start_lmgrd stop
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

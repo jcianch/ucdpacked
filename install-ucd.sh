@@ -62,9 +62,15 @@ cd $MEDIA_DIR/ibm-ucd-install/
 rm $MEDIA_DIR/ibm-ucd-install/install.properties
 mv $MEDIA_DIR/ibm-ucd-install/orig-install.properties $MEDIA_DIR/ibm-ucd-install/install.properties
 
-# now start the ucd server
-/opt/ibm-ucd/server/bin/server start
+#install UCD Server as a service
+sed -i -e 's/@SERVER_USER@/root/g' -e 's/@SERVER_GROUP@/root/g' /opt/ibm-ucd/server/bin/init/server
+sed -i '/SERVER_PROG=/c\SERVER_PROG=ucd_server' /opt/ibm-ucd/server/bin/init/server
+cp $BASE_DIR/scripts/ucd-server.service /etc/systemd/system/ucd-server.service
+systemctl enable ucd-server.service
+echo "Starting the UCD Server..."
+systemctl start ucd-server.service
 
+sleep 30s
 # now install udclient
 unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
 
@@ -106,9 +112,15 @@ echo "Installing the UCD Agent with the following properties:"
 cat /tmp/ibm-ucd-agent-install/vagrant-agent-install.properties
 /tmp/ibm-ucd-agent-install/install-agent-from-file.sh /tmp/ibm-ucd-agent-install/vagrant-agent-install.properties
 rm -rf /tmp/ibm-ucd-agent-install
-# now start the udagent
+
+# install udagent as a service
+sed -i -e 's/AGENT_USER=/AGENT_USER=root/g' -e 's/AGENT_GROUP=/AGENT_GROUP=root/' /opt/ibm-ucd/agent/bin/init/agent
+sed -i '/unique_name=/c\unique_name=ucd_agent' /opt/ibm-ucd/agent/bin/init/agent
+cp $BASE_DIR/scripts/ucd-agent.service /etc/systemd/system/ucd-agent.service
+systemctl enable ucd-agent.service
 echo "Starting the UCD Agent..."
-/opt/ibm-ucd/agent/bin/agent start
+systemctl start ucd-agent.service
+
 
 # now license the ucd server
 echo "Updating UCD Server system configuration..."
@@ -120,23 +132,6 @@ cat > /tmp/config.json <<EOF
 EOF
 sleep 30s # give UCD enough time to start up before running this command
 /opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -username admin -password ${MY_UCD_PASSWORD} setSystemConfiguration /tmp/config.json
-
-#TODO install UCD Server as a service
-# sed -e 's/@SERVER_USER@/root/g' -e 's/@SERVER_GROUP@/root/g' /opt/ibm-ucd/server/bin/init/server > /etc/init.d/ucd
-# chmod +x /etc/init.d/ucd
-# chown root:root /etc/init.d/ucd
-# update-rc.d ucd defaults
-# update-rc.d ucd enable
-
-# install udagent as a service
-# sed -e 's/AGENT_USER=/AGENT_USER=root/g' -e 's/AGENT_GROUP=/AGENT_GROUP=root/' /opt/ibm-ucd/agent/bin/init/agent > /etc/init.d/udagent
-
-# ln -s /opt/ibm-ucd/agent/bin/agent /opt/ibm-ucd/agent/bin/ibm-ucdagent
-
-# chmod +x /etc/init.d/udagent
-# chown root:root /etc/init.d/udagent
-# update-rc.d udagent defaults
-# update-rc.d udagent enable
 
 echo "Requesting new Auth Token from UCD server for UCDP..."
 token=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT}  \
