@@ -11,6 +11,10 @@ Vagrant.configure(2) do |config|
      print "vagrant-cachier plugin has not been found."
      print "You can install it by `vagrant plugin install vagrant-cachier`"
   end
+  if !Vagrant.has_plugin?("vagrant-reload")
+     abort("vagrant-cachier plugin has not been found. You can install it by `vagrant plugin install vagrant-reload`")
+  end
+
   config.vm.define "stackinabox" do |stackinabox|
 
     # boxes at https://atlas.hashicorp.com/search.
@@ -35,21 +39,38 @@ Vagrant.configure(2) do |config|
     sed -i 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
 SCRIPT
 
-    stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
-    stackinabox.vm.provision "shell", name: "setup networking", privileged: true, keep_color: false, path: "networks.sh"
-    stackinabox.vm.provision :reload
-    stackinabox.vm.provision "shell", name: "yum update", privileged: true,   inline: "yum update -y"
-    stackinabox.vm.provision :reload
-    stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
-    stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
-    stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
-    #TODO stackinabox.vm.provision "shell", name: "update engine", privileged: true, keep_color: false, path: "upgrade-engine.sh"
-    stackinabox.vm.provision :reload
-    stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
-    stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
-    #TODO stackinabox.vm.provision "shell", name: "upgrade UCD", privileged: true, keep_color: false, path: "upgrade-ucd.sh"
-    stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
-    #TODO stackinabox.vm.provision "shell", name: "upgrade Designer", privileged: true, keep_color: false, path: "upgrade-designer.sh"
+    env_upgrade = ENV['UPGRADE']
+    if env_upgrade.nil?
+      print "Provisioning everything"
+      stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
+      stackinabox.vm.provision "shell", name: "setup networking", privileged: true, keep_color: false, path: "networks.sh"
+      stackinabox.vm.provision :reload
+      stackinabox.vm.provision "shell", name: "yum update", privileged: true,   inline: "yum update -y"
+      stackinabox.vm.provision :reload
+      stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
+      stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
+      stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
+      stackinabox.vm.provision :reload
+      stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
+      stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
+      stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+    else
+      if env_upgrade.include? "UCD"
+        print "Upgrading UCD"
+        # #TODO stackinabox.vm.provision "shell", name: "upgrade UCD", privileged: true, keep_color: false, path: "upgrade-ucd.sh"
+      end
+      if env_upgrade.include? "engine"
+        print "Upgrading engine"
+        stackinabox.vm.provision "shell", name: "update engine", privileged: true, keep_color: false, path: "extend-engine.sh"
+      end
+      if env_upgrade.include? "designer"
+        print "Upgrading designer"
+        stackinabox.vm.provision "shell", name: "upgrade Designer", privileged: true, keep_color: false, path: "upgrade-designer.sh"
+      end
+      stackinabox.vm.provision :reload
+
+    end
+
     stackinabox.vm.provision "shell", name: "All Done", privileged: true, keep_color: false, path: "alldone.sh"
 
   end
