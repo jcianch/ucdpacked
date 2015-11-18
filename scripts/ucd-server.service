@@ -1,7 +1,6 @@
 [Unit]
 Description=UrbanCode Deploy Server
 After=network.target
-Wants=rlks.service
 Before=ucd-agent.service
 
 [Service]

@@ -57,7 +57,7 @@ SCRIPT
     else
       if env_upgrade.include? "UCD"
         print "Upgrading UCD"
-        # #TODO stackinabox.vm.provision "shell", name: "upgrade UCD", privileged: true, keep_color: false, path: "upgrade-ucd.sh"
+        stackinabox.vm.provision "shell", name: "upgrade UCD", privileged: true, keep_color: false, path: "upgrade-ucd.sh"
       end
       if env_upgrade.include? "engine"
         print "Upgrading engine"
