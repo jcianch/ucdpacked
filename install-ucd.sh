@@ -4,7 +4,7 @@ source /vagrant/parameters.sh
 yum install -y unzip
 # install java
 mkdir -p /opt/IBM/
-cp -R $MEDIA_DIR/ibm-ucd-patterns-install/web-install/media/server/java /opt/IBM/
+cp -R $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/web-install/media/server/java /opt/IBM/
 export JAVA_HOME=/opt/IBM/java/jre
 export PATH=$PATH:$JAVA_HOME/bin
 
@@ -26,10 +26,10 @@ CREATE DATABASE ibm_ucd;
 GRANT ALL ON ibm_ucd.* TO 'ibm_ucd'@'%' IDENTIFIED BY 'ibm_ucd' WITH GRANT OPTION; "
 
 # Download the mysql java driver jar and put it into ibm-ucd-install/lib/ext directory
-cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/ibm-ucd-install/lib/ext
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/lib/ext
 
 # make copy of original properies file
-cp $MEDIA_DIR/ibm-ucd-install/install.properties $MEDIA_DIR/ibm-ucd-install/orig-install.properties
+cp $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/orig-install.properties
 
 # echo per-deployment configurable properties
 # TODO: make these values configurable from options.yml
@@ -51,16 +51,16 @@ install.server.dir=/opt/ibm-ucd/server
 server.jms.mutualAuth=false
 server.initial.password=${MY_UCD_PASSWORD}
 rcl.server.url=27000@${MY_RLKS_IP}
-" >> $MEDIA_DIR/ibm-ucd-install/install.properties
+" >> $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
 
 echo "Installing UCD Server with the following properties:"
-cat $MEDIA_DIR/ibm-ucd-install/install.properties
-cd $MEDIA_DIR/ibm-ucd-install/
+cat $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
+cd $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/
 ./install-server.sh
 
 # restore the orig-install.properties
-rm $MEDIA_DIR/ibm-ucd-install/install.properties
-mv $MEDIA_DIR/ibm-ucd-install/orig-install.properties $MEDIA_DIR/ibm-ucd-install/install.properties
+rm $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
+mv $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/orig-install.properties $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
 
 #install UCD Server as a service
 sed -i -e 's/@SERVER_USER@/root/g' -e 's/@SERVER_GROUP@/root/g' /opt/ibm-ucd/server/bin/init/server
@@ -72,7 +72,7 @@ systemctl start ucd-server.service
 
 sleep 30s
 # now install udclient
-unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
+unzip -q $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
 
 
 echo ""
@@ -85,7 +85,7 @@ echo ""
 echo ""
 
 # unzip ucdagent install archive to /tmp
-unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/ibm-ucd-agent.zip -d /tmp
+unzip -q $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/ibm-ucd-agent.zip -d /tmp
 
 # echo per-deployment configurable properties
 # TODO: make these values configurable from options.yml
@@ -152,7 +152,7 @@ echo "## using JAVA_HOME=$JAVA_HOME                                             
 echo "###############################################################################"
 echo "                                                                               "
 echo "                                                                               "            
-cd $MEDIA_DIR/ibm-ucd-patterns-install/agent-package-install
+cd $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/agent-package-install
 ./install-agent-packages.sh -s http://${IPADDRESS}:${MY_UCD_HTTP_PORT} -a $token 
 
 echo "                                                                               "

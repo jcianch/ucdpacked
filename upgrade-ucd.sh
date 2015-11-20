@@ -13,25 +13,25 @@ echo ""
 systemctl stop ucd-server.service
 
 # Download the mysql java driver jar and put it into ibm-ucd-install/lib/ext directory
-cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/ibm-ucd-install/lib/ext
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/lib/ext
 
 # make copy of original properies file
-cp $MEDIA_DIR/ibm-ucd-install/install.properties $MEDIA_DIR/ibm-ucd-install/orig-install.properties
+cp $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/orig-install.properties
 
 # echo per-deployment configurable properties
 # TODO: make these values configurable from options.yml
 echo "
 nonInteractive=true
-" >> $MEDIA_DIR/ibm-ucd-install/install.properties
+" >> $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
 
 echo "Installing UCD Server with the following properties:"
-cat $MEDIA_DIR/ibm-ucd-install/install.properties
-cd $MEDIA_DIR/ibm-ucd-install/
+cat $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
+cd $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/
 ./install-server.sh
 
 # restore the orig-install.properties
-rm $MEDIA_DIR/ibm-ucd-install/install.properties
-mv $MEDIA_DIR/ibm-ucd-install/orig-install.properties $MEDIA_DIR/ibm-ucd-install/install.properties
+rm $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
+mv $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/orig-install.properties $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/install.properties
 
 echo "Starting the UCD Server..."
 sed -i -e 's/@SERVER_USER@/root/g' -e 's/@SERVER_GROUP@/root/g' /opt/ibm-ucd/server/bin/init/server
@@ -41,7 +41,7 @@ systemctl start ucd-server.service
 sleep 30s
 # now install udclient
 rm -rf /opt/ibm-ucd/udclient
-unzip -q $MEDIA_DIR/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
+unzip -q $MEDIA_DIR/$UCDVERSION/ibm-ucd-install/overlay/opt/tomcat/webapps/ROOT/tools/udclient.zip -d /opt/ibm-ucd
 
 
 echo ""

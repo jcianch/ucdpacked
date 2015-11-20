@@ -13,3 +13,4 @@ export MY_UCD_HTTPS_PORT=10443 #UCD server HTTPS port
 export MY_UCD_PASSWORD=My_passw0rd #UCD admin Password
 export MY_UCDP_HTTP_PORT=9080 #Design server HTTP port
 export MY_UCDP_HTTPS_PORT=9443 #Design server HTTPS port
+export UCDVERSION=6.2.0

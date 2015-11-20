@@ -28,10 +28,10 @@ for elem in data:
 echo "Retrieve Auth Token: ${token}"
 
 #Install UCDP web designer
-cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/ibm-ucd-patterns-install/web-install/media/server/lib/ext
-#chmod 755 $MEDIA_DIR/ibm-ucd-patterns-install/web-install/install.sh
-chmod 755 $MEDIA_DIR/ibm-ucd-patterns-install/web-install/gradlew
-cd $MEDIA_DIR/ibm-ucd-patterns-install/web-install
+cp $MEDIA_DIR/dbjar/mariadb-java-client-1.2.3.jar $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/web-install/media/server/lib/ext
+#chmod 755 $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/web-install/install.sh
+chmod 755 $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/web-install/gradlew
+cd $MEDIA_DIR/$UCDVERSION/ibm-ucd-patterns-install/web-install
 
 export JAVA_OPTS="-Dlicense.accepted=Y \
 -Dinstall.server.dir=/opt/ibm-ucd-patterns \

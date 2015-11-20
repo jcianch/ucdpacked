@@ -20,9 +20,9 @@ BOOTPROTO="none"
 IPADDR=$IPADDRESS  
 NETMASK="255.255.255.0"  
 DNS1="8.8.8.8" 
-DNS2="172.16.235.2"
-BROADCAST="172.16.235.255"  
-GATEWAY="172.16.235.2"  
+DNS2="172.19.21.2"
+BROADCAST="172.19.21.255"  
+GATEWAY="172.19.21.2"  
 NM_CONTROLLED="no"  
 DEFROUTE="yes"  
 IPV4_FAILURE_FATAL="yes"  
@@ -44,7 +44,7 @@ EOF
 #TODO If getting IP address from different subnet change here as required adn in openstack-config.sh
 cat > /etc/resolv.conf <<'EOF'
 search localdomain
-nameserver 172.16.235.2
+nameserver 172.19.21.2
 nameserver 8.8.8.8
 EOF
 #Centos 7 vagrant image has ens33 as eth1. Not required

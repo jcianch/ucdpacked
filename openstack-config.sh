@@ -12,7 +12,8 @@ neutron subnet-delete public_subnet
 neutron net-delete public
 sleep 30s
 neutron net-create public --router:external
-neutron subnet-create public 172.16.235.0/24 --name public_subnet --enable_dhcp=False --allocation_pool start=172.16.235.201,end=172.16.235.220 --gateway 172.16.235.2
+neutron subnet-create public 172.19.21.0/24 --name public_subnet --enable_dhcp=False \
+--allocation_pool start=172.19.21.201,end=172.19.21.220 --gateway 172.19.21.2
 neutron router-create router1
 neutron router-gateway-set router1 public
 neutron router-interface-add router1 private_subnet

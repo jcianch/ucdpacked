@@ -1,8 +1,6 @@
 [Unit]
 Description=UrbanCode Deploy Agent
-After=network.target
-After=ucd-server.service
-Requires=ucd-server.service
+After=network.target network.service ucd-server.service
 
 [Service]
 Type=forking

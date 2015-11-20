@@ -50,7 +50,6 @@ SCRIPT
       stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
       stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
       stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
-      stackinabox.vm.provision :reload
       stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
       stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
       stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
@@ -67,10 +66,8 @@ SCRIPT
         print "Upgrading designer"
         stackinabox.vm.provision "shell", name: "upgrade Designer", privileged: true, keep_color: false, path: "upgrade-designer.sh"
       end
-      stackinabox.vm.provision :reload
-
     end
-
+    stackinabox.vm.provision :reload
     stackinabox.vm.provision "shell", name: "All Done", privileged: true, keep_color: false, path: "alldone.sh"
 
   end

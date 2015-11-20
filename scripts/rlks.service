@@ -1,13 +1,15 @@
 [Unit]
 Description=Rational License Key Server
-After=network.target
+After=network.target network.service
+Before=ucd-server.service ucd-agent.service
 
 [Service]
+WorkingDirectory=/opt/IBM/RationalRLKS/bin
+ExecStart=/opt/IBM/RationalRLKS/bin/lmgrd -c /opt/IBM/RationalRLKS/config/server_license.lic -l /opt/IBM/RationalRLKS/logs/lmgrd.log
+ExecStop=/opt/IBM/RationalRLKS/bin/lmdown -c /opt/IBM/RationalRLKS/config/server_license.lic
+Restart=always
+RestartSec=30
 Type=forking
-User=root
-ExecStart=/opt/IBM/RationalRLKS/config/start_lmgrd start
-ExecStop=/opt/IBM/RationalRLKS/config/start_lmgrd stop
-Restart=on-abort
 
 [Install]
 WantedBy=multi-user.target
