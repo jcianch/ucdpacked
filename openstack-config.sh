@@ -4,7 +4,7 @@ source /root/keystonerc_admin
 nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0  
 nova secgroup-add-rule default tcp 22 22 0.0.0.0/0  
 
-#delete Packstack created network/router and recreate
+#delete Packstack created public network/router and recreate
 neutron router-interface-delete router1 private_subnet
 neutron router-gateway-clear router1
 neutron router-delete router1
@@ -12,8 +12,8 @@ neutron subnet-delete public_subnet
 neutron net-delete public
 sleep 30s
 neutron net-create public --router:external
-neutron subnet-create public 172.19.21.0/24 --name public_subnet --enable_dhcp=False \
---allocation_pool start=172.19.21.201,end=172.19.21.220 --gateway 172.19.21.2
+neutron subnet-create public $MY_SUBNET --name public_subnet --enable_dhcp=False \
+--allocation_pool start=$MY_IP_START,end=$MY_IP_END --gateway $MY_GATEWAY
 neutron router-create router1
 neutron router-gateway-set router1 public
 neutron router-interface-add router1 private_subnet

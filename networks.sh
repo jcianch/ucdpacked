@@ -19,10 +19,10 @@ DEVICE="br-ex"
 BOOTPROTO="none"  
 IPADDR=$IPADDRESS  
 NETMASK="255.255.255.0"  
-DNS1="8.8.8.8" 
-DNS2="172.19.21.2"
-BROADCAST="172.19.21.255"  
-GATEWAY="172.19.21.2"  
+DNS1=$MY_DNS1
+DNS2=$MY_DNS2
+BROADCAST=$MY_BROADCAST  
+GATEWAY=$MY_GATEWAY
 NM_CONTROLLED="no"  
 DEFROUTE="yes"  
 IPV4_FAILURE_FATAL="yes"  
@@ -44,8 +44,8 @@ EOF
 #TODO If getting IP address from different subnet change here as required adn in openstack-config.sh
 cat > /etc/resolv.conf <<'EOF'
 search localdomain
-nameserver 172.19.21.2
-nameserver 8.8.8.8
+nameserver $MY_DNS1
+nameserver $MY_DNS2
 EOF
 #Centos 7 vagrant image has ens33 as eth1. Not required
 echo "device ens33" > /etc/sysconfig/network-scripts/ifcfg-ens33

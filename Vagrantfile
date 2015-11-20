@@ -40,6 +40,7 @@ Vagrant.configure(2) do |config|
 SCRIPT
 
     env_upgrade = ENV['UPGRADE']
+    env_osonly = ENV['OSONLY']
     if env_upgrade.nil?
       print "Provisioning everything"
       stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
@@ -49,10 +50,12 @@ SCRIPT
       stackinabox.vm.provision :reload
       stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
       stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
-      stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
-      stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
-      stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
-      stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+      if env_osonly.nil?
+        stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
+        stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
+        stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
+        stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+      end
     else
       if env_upgrade.include? "UCD"
         print "Upgrading UCD"

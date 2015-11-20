@@ -13,4 +13,13 @@ export MY_UCD_HTTPS_PORT=10443 #UCD server HTTPS port
 export MY_UCD_PASSWORD=My_passw0rd #UCD admin Password
 export MY_UCDP_HTTP_PORT=9080 #Design server HTTP port
 export MY_UCDP_HTTPS_PORT=9443 #Design server HTTPS port
-export UCDVERSION=6.2.0
+export UCDVERSION=6.2.0 #sub-directory in $MEDIA_DIR for ucd media
+
+#Network settings
+export MY_DNS1=8.8.8.8
+export MY_DNS2=172.19.21.2
+export MY_BROADCAST=172.19.21.255
+export MY_GATEWAY=172.19.21.2
+export MY_SUBNET=172.19.21.0/24
+export MY_IP_START=172.19.21.201
+export MY_IP_END=172.19.21.220
