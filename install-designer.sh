@@ -10,35 +10,6 @@ echo "##########################################################################
 echo "                                                                               "
 echo "                                                                               "
 
-# locate the admin tenant uuid
-echo "Retrieving OpenStack 'admin' tenant id from OpenStack server"
-
-# request auth token from OpenStack Keystone server
-cat > OStokenrequest.json <<EOF
-{ "auth":
-  { "tenantName": "admin",
-    "passwordCredentials": {
-        "username": "admin",
-        "password": "${MY_OS_PASSWORD}"
-    }
-  }
-}
-EOF
-OS_TOKEN=`curl -s -H "Content-Type: application/json" \
-  -d @OStokenrequest.json  http://${IPADDRESS}:5000/v2.0/tokens | python -c "import json; import sys;
-data=json.load(sys.stdin); print data['access']['token']['id']"`
-echo "Found OpenStack 'admin' auth token: ${OS_TOKEN}"
-
-# request listing of all tenants in OpenStack server, send AuthToken we retrieve earlier
-tenant=`curl -s -H "X-Auth-Token:${OS_TOKEN}" http://${IPADDRESS}:35357/v2.0/tenants | python -c \
-"import json; import sys;
-data=json.load(sys.stdin);
-for index in range(len(data['tenants'])):
-    if data['tenants'][index]['name'] == 'admin':
-      print data['tenants'][index]['id']"`
-
-echo "Found 'admin' tenant id: ${tenant}"
-
 # create new auth token for use by UCDP web-designer
 echo "Requesting new Auth Token from UCD server for UCDP..."
 token=`/opt/ibm-ucd/udclient/udclient -weburl http://${IPADDRESS}:${MY_UCD_HTTP_PORT} \
