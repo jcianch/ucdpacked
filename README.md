@@ -42,9 +42,9 @@ vagrant-vmware-workstation plugin
 
 ##5. MEDIA_DIR
 * Put all the *extracted* media "somewhere", so that following directories exist and set the value of MEDIA_DIR to point to "somewhere":
-- <ucdversion>/ibm-ucd-install
-- <ucdversion>/ibm-ucd-patterns-install
-- rlks814
+  - <ucdversion>/ibm-ucd-install
+  - <ucdversion>/ibm-ucd-patterns-install
+  - rlks814
 
 * The ibm-ucd-patterns-install should obvously contain engine-install & web-install.
 * The "rlks814" should contain the content of disk1 from the RLKS 8.1.4 linux install zip.
@@ -56,7 +56,7 @@ The rest should not require modification.
 * Once you're satisfied with 1-5 above just run "vagrant up" and in about 20 minutes you sould have a fully functional VM and the alldone.sh will spit out the URLs, usernames and passwords to use. A default SSH key for access to any OpenStack VMs created will be generated in "admin_key.priv" in the same directory as Vagrantfile. Or you can generate your own.
 
 ##7. Upgrading UCD
-*Once you have a working VM the same Vagrantfile can be used to just upgrade UCD, Designer and the Engine, without rebuilding OpenStack. Just put the media for the version required as in (2) and then run
+* Once you have a working VM the same Vagrantfile can be used to just upgrade UCD, Designer and the Engine, without rebuilding OpenStack. Just put the media for the version required as in (2) and then run
 ```
 UPGRADE="UCD designer engine" vagrant up --provision
 ```
