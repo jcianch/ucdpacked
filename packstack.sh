@@ -65,3 +65,8 @@ sed -i -e 's/interval: 600/interval: 60/g' /etc/ceilometer/pipeline.yaml
 #Modify Nova for telemetry
 crudini --set /etc/nova/nova.conf DEFAULT notification_driver messagingv2 || true
 
+#Fix for https://bugzilla.redhat.com/show_bug.cgi?id=1218894 
+echo "
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+AUTH_USER_MODEL = 'openstack_auth.User'
+" >> /etc/openstack-dashboard/local_settings
