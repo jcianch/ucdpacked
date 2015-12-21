@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.ssh.host = "172.19.21.130"
+  #config.ssh.host = "172.19.21.130"
   if Vagrant.has_plugin?("vagrant-cachier")
      config.cache.scope = :box # cache at the base box level
 
