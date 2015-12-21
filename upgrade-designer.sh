@@ -66,4 +66,3 @@ systemctl start ibm-cds.service
 sleep 30s
 # hit landscaper homepage to ensure database setup occurs
 wget -q http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper
-sleep 60s

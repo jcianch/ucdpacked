@@ -71,4 +71,5 @@ echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
 sysctl -p
 #TODO The Centos 7 vagrant image has ens32 as eth0. Change as needed
 iptables -t nat -A POSTROUTING -o ens32 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o br-ex -j MASQUERADE
 iptables -A POSTROUTING -t mangle -p udp --dport bootpc -j CHECKSUM --checksum-fill

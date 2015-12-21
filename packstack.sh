@@ -5,17 +5,8 @@ yum install -y openstack-packstack  qemu-kvm qemu-img virt-manager libvirt libvi
 
 modprobe vhost_net
 echo  vhost_net > /etc/modules-load.d/vhost_net.conf
-##Nov 29 2015: This is required as packstack appears broken: 
-##See https://ask.openstack.org/en/question/85014/error-could-not-find-data-item-config_use_subnets-in-any-hiera-data-file/
-packstack --allinone -y
-rpm -e puppet 
-rpm -e hiera
-rpm -ivh https://yum.puppetlabs.com/el/7/products/x86_64/hiera-1.3.4-1.el7.noarch.rpm
-crudini --set /etc/yum.repos.d/epel.repo epel exclude hiera* || true
-yum install -y puppet-3.6.2-3.el7.noarch 
-rm -f /etc/puppet/hiera.yaml
-##End fix for broken packstack
 packstack --default-password=${MY_OS_PASSWORD} --allinone \
+--use-epel=y \
 --mariadb-install=y \
 --os-glance-install=y \
 --os-cinder-install=y \

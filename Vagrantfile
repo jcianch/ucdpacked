@@ -2,6 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
+  config.ssh.host = "172.19.21.130"
   if Vagrant.has_plugin?("vagrant-cachier")
      config.cache.scope = :box # cache at the base box level
 
@@ -12,13 +13,13 @@ Vagrant.configure(2) do |config|
      print "You can install it by `vagrant plugin install vagrant-cachier`"
   end
   if !Vagrant.has_plugin?("vagrant-reload")
-     abort("vagrant-cachier plugin has not been found. You can install it by `vagrant plugin install vagrant-reload`")
+     abort("vagrant-reload plugin has not been found. You can install it by `vagrant plugin install vagrant-reload`")
   end
 
   config.vm.define "stackinabox" do |stackinabox|
 
     # boxes at https://atlas.hashicorp.com/search.
-    stackinabox.vm.box = "puppetlabs/centos-7.0-64-nocm"
+    stackinabox.vm.box = "puppetlabs/centos-7.0-64-nocm"#
     stackinabox.vm.hostname = "stackinabox"
     vmware = "vmware_workstation"
     stackinabox.vm.provider vmware do |vw|
@@ -55,6 +56,10 @@ SCRIPT
         stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
         stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
         stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+        stackinabox.vm.provision "shell", name: "add JKE app to UCD", privileged: true, keep_color: false, path: "addJKE.sh"
+        stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "UCDwUCD.sh"
+        stackinabox.vm.provision "shell", name: "add MobileFirst app to UCD", privileged: true, keep_color: false, path: "addMobileFirst.sh"
+
       end
     else
       if env_upgrade.include? "UCD"
