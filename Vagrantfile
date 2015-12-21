@@ -57,9 +57,8 @@ SCRIPT
         stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
         stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
         stackinabox.vm.provision "shell", name: "add JKE app to UCD", privileged: true, keep_color: false, path: "addJKE.sh"
-        stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "UCDwUCD.sh"
+        stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "addUCDwUCD.sh"
         stackinabox.vm.provision "shell", name: "add MobileFirst app to UCD", privileged: true, keep_color: false, path: "addMobileFirst.sh"
-
       end
     else
       if env_upgrade.include? "UCD"
