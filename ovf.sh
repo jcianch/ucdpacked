@@ -1,23 +1,28 @@
 # shutdown VM so we can export it
+source ./parameters.sh
+
 vagrant halt
 
 timestamp=$(date +"%d%m%Y_%H%M")
 
-rm -rf build/ovf/vmware/Kilo6.2.0.$timestamp
-mkdir -p build/ovf/vmware/Kilo6.2.0.$timestamp
+rm -rf build/ovf/vmware/${OS_VERSION}UCD${UCDVERSION}${timestamp}
+mkdir -p build/ovf/vmware/${OS_VERSION}UCD${UCDVERSION}${timestamp}
 
 #   --allowAllExtraConfig \
 #get ovftool path and vagrant machine id
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
    OVFTOOL=/usr/bin/ovftool
    IDCAT=`cat .vagrant/machines/stackinabox/vmware_workstation/id`
+   VDISKDIR=$(dirname $(cat .vagrant/machines/stackinabox/vmware_workstation/id))
+   vmware-vdiskmanager -d $VDISKDIR/disk-cl1.vmdk
+   vmware-vdiskmanager -k $VDISKDIR/disk-cl1.vmdk
 elif [[ "$OSTYPE" == "darwin"* ]]; then
    OVFTOOL=/Applications/VMware\ Fusion.app/Contents/Library/VMware\ OVF\ Tool/ovftool
    IDCAT=`cat .vagrant/machines/stackinabox/vmware_fusion/id`
 fi
 "$OVFTOOL" \
-	--name=KiloLandscaper620 \
-	--computerName:vm=KiloLandscaper620 \
+	--name=${OS_VERSION}UCD${UCDVERSION} \
+	--computerName:vm=stackinabox \
 	--compress=9 \
 	--chunkSize=756mb \
 	--maxVirtualHardwareVersion=9 \
@@ -25,8 +30,6 @@ fi
 	--targetType=OVF \
 	--numberOfCpus:vm=4 \
 	--memorySize:vm=8192 \
-	--diskSize:vm,5=40960 \
-    --diskSize:vm,6=204800 \
 	--diskMode=monolithicFlat \
 	--overwrite \
 	--powerOffSource \
@@ -72,4 +75,4 @@ fi
 	--X:logLevel=verbose \
 	--X:logToConsole \
 	$IDCAT \
-	build/ovf/vmware/Kilo6.2.0.$timestamp
+	build/ovf/vmware/${OS_VERSION}UCD${UCDVERSION}${timestamp}
