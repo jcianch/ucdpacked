@@ -194,15 +194,15 @@ curl -u ucdpadmin:ucdpadmin  -H 'Content-Type: application/json' -d @cloudAuthor
 http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/${TEAM_ID//\"} -X PUT -o cloudAuthorisation.rsp
 
 
-cp $MEDIA_DIR/landscaper/tunnel.sh /home/vagrant
+cp $MEDIA_DIR/scripts/tunnel.sh /home/vagrant
 chmod 755 /home/vagrant/tunnel.sh
 chown vagrant:vagrant /home/vagrant/tunnel.sh
 
-cp $MEDIA_DIR/landscaper/aws-setup.sh /home/vagrant/aws-setup.sh
+cp $MEDIA_DIR/scripts/aws-setup.sh /home/vagrant/aws-setup.sh
 chmod 755 /home/vagrant/aws-setup.sh
 chown vagrant:vagrant /home/vagrant/aws-setup.sh
 
-cp $MEDIA_DIR/landscaper/sl-setup.sh /home/vagrant/sl-setup.sh
+cp $MEDIA_DIR/scripts/sl-setup.sh /home/vagrant/sl-setup.sh
 chmod 755 /home/vagrant/sl-setup.sh
 chown vagrant:vagrant /home/vagrant/sl-setup.sh
 sleep 60
