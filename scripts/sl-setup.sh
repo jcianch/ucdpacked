@@ -74,139 +74,17 @@ sshpass -p $rootpass ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyCheckin
 -tt root@$publicip &>>.sl-setup-log <<EOF
 
 echo "\
-GatewayPorts clientspecified" | sudo tee -a /etc/ssh/sshd_config
+GatewayPorts yes " | sudo tee -a /etc/ssh/sshd_config
 sudo initctl restart ssh
 
 exit
 EOF
-
-sudo sshpass -p $rootpass ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
--f -N -R $privateip:20080:${IPADDRESS}:20080 \
--R $privateip:20081:${IPADDRESS}:20081 \
--R $privateip:7916:${IPADDRESS}:7916 root@$publicip &>>.sl-setup-log
-
-# setup SL Cloud Provider in UCDP
-
-wget -q http://stedolan.github.io/jq/download/linux64/jq &>>.sl-setup-log
-chmod 755 jq
-export PATH=$PATH:.
-
-export SL_ID=`cat ~/.softlayer | grep username | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $3}'`
-export SL_KEY=`cat ~/.softlayer | grep api_key | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $3}'`
-
-export SL_CLOUD_PROVIDER_ID=`curl -s -u ucdpadmin:ucdpadmin \
-  http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/cloudprovider/ | python -c \
-  "import json; import sys;
-data=json.load(sys.stdin);
-for index in range(len(data)):
-  if data[index]['name'] == 'SoftLayer':
-    print data[index]['id']"`
-
-if [[ "$SL_CLOUD_PROVIDER_ID" == "" ]]; then
-  rm -f ./sl-provider.json
-  cat >> ./sl-provider.json <<EOF
-  {
-    "name": "SoftLayer",
-    "type": "SOFTLAYER",
-    "costCenterId": "",
-    "properties": [
-      {
-        "name": "url",
-        "value": "http://${IPADDRESS}:5000/v2.0",
-        "secure": false
-      },{
-        "name": "timeoutMins",
-        "value": "60",
-        "secure": false
-      },{
-        "name": "useDefaultOrchestration",
-        "value": "true",
-        "secure": false
-      },{
-        "name": "orchestrationEngineUrl",
-        "value": "",
-        "secure": false
-      }
-    ]
-  }
-EOF
-
-  curl -s -u ucdpadmin:ucdpadmin \
-       -H 'Content-Type: application/json' \
-       -d @sl-provider.json \
-       http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/cloudprovider/ -X POST -o cloudProvider.rsp
-fi
-SL_CLOUD_PROVIDER_ID=`awk -F: '{print $2}' cloudProvider.rsp | awk -F, '{print $1}'`
-echo "SL_CLOUD_PROVIDER_ID: $SL_CLOUD_PROVIDER_ID" &>>.sl-setup-log
-
-export CLOUD_PROJECTS=`curl -s -u ucdpadmin:ucdpadmin \
-http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/cloudproject/`
-
-export SL_CLOUD_PROJECT_ID=`echo ${CLOUD_PROJECTS} | python -c \
-"import json; import sys;
-data=json.load(sys.stdin);
-for index in range(len(data)):
-  if data[index]['displayName'] == 'admin@SoftLayer':
-    print data[index]['id']"`
-
-if [[ "$SL_CLOUD_PROJECT_ID" == "" ]]; then
-  rm -f ./sl-cloud-project.json
-  cat > ./sl-cloud-project.json <<EOF
-  {
-    "name": "admin",
-    "cloudProviderId": "${SL_CLOUD_PROVIDER_ID//\"}",
-    "properties": [
-      {
-        "name": "functionalId",
-        "value": "admin",
-        "secure": false
-      },{
-        "name": "functionalPassword",
-        "value": "${MY_OS_PASSWORD}",
-        "secure": true
-      },{
-        "name": "SoftLayerUser",
-        "value": "$SL_ID",
-        "secure": false
-      },{
-        "name": "SoftLayerApiKey",
-        "value": "$SL_KEY",
-        "secure": false
-      },{
-        "name": "defaultRegion",
-        "value": "RegionOne",
-        "secure": false
-      }
-    ]
-  }
-EOF
-
-  curl -s -u ucdpadmin:ucdpadmin \
-       -H 'Content-Type: application/json' \
-       -d @sl-cloud-project.json \
-       http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/cloudproject/ -X POST -o cloudProject.rsp
-fi
-export SL_CLOUD_PROJECT_ID=`awk -F: '{print $2}' cloudProject.rsp | awk -F, '{print $1}'`
-echo "SL_CLOUD_PROJECT_ID: $SL_CLOUD_PROJECT_ID" &>>.sl-setup-log
-
-export CURR_CLOUD_PROJECT_IDS=`echo ${CLOUD_PROJECTS} | python -c \
-"import json; import sys;
-data=json.load(sys.stdin);
-for index in range(len(data)):
-    print '\"' + data[index]['id'] + '\"' + ','"`
-
-cat > cloudAuthorisation.json <<EOF
-{
-   "name":"Internal Team",
-   "resources":[],
-   "cloud_projects":[${CURR_CLOUD_PROJECT_IDS}${SL_CLOUD_PROJECT_ID}]
-}   
-EOF
-curl -u ucdpadmin:ucdpadmin  http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/ -o getTeam.rsp
-TEAM_ID=`awk -F: '{print $2}' getTeam.rsp | awk -F, '{print $1}'`
-
-curl -u ucdpadmin:ucdpadmin  -H 'Content-Type: application/json' -d @cloudAuthorisation.json \
-http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/${TEAM_ID//\"} -X PUT -o cloudAuthorisation.rsp
+sshpass -p $rootpass ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+-o TCPKeepAlive=no -o ServerAliveInterval=10 -2 -f -N -T \
+-R 20080:${IPADDRESS}:20080 \
+-R 20081:${IPADDRESS}:20081 \
+-R 7916:${IPADDRESS}:7916 \
+root@$publicip 
 
 rm -f ./sl-shutdown.sh
 cat > ./sl-shutdown.sh <<EOF
