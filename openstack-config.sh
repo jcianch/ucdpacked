@@ -4,6 +4,7 @@ source /root/keystonerc_admin
 nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0  
 nova secgroup-add-rule default tcp 22 22 0.0.0.0/0  
 # add security group rule to allow http access
+nova secgroup-create was-liberty-sg "WLP security group for your WebSphere servers."
 nova secgroup-add-rule was-liberty-sg tcp 22 22 '0.0.0.0/0'
 nova secgroup-add-rule was-liberty-sg tcp 80 80 '0.0.0.0/0'
 nova secgroup-add-rule was-liberty-sg tcp 443 443 '0.0.0.0/0'
