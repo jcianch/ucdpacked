@@ -42,6 +42,7 @@ crudini --set /etc/nova/nova.conf DEFAULT my_ip ${IPADDRESS} || true
 crudini --set /etc/nova/nova.conf DEFAULT vncserver_proxyclient_address ${IPADDRESS} || true
 crudini --set /etc/nova/nova.conf DEFAULT force_config_drive always || true
 crudini --set /etc/nova/nova.conf DEFAULT mkisofs_cmd genisoimage || true
+crudini --set /etc/nova/nova.conf DEFAULT ram_allocation_ratio 15 || true
 
 crudini --set /etc/nova/nova.conf libvirt virt_type kvm || true
 crudini --set /etc/nova/nova.conf libvirt cpu_mode host-passthrough || true
@@ -57,7 +58,7 @@ sed -i -e 's/interval: 600/interval: 60/g' /etc/ceilometer/pipeline.yaml
 crudini --set /etc/nova/nova.conf DEFAULT notification_driver messagingv2 || true
 
 #Fix for https://bugzilla.redhat.com/show_bug.cgi?id=1218894 
-echo "
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-AUTH_USER_MODEL = 'openstack_auth.User'
-" >> /etc/openstack-dashboard/local_settings
+# echo "
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# AUTH_USER_MODEL = 'openstack_auth.User'
+# " >> /etc/openstack-dashboard/local_settings
