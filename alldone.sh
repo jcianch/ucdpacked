@@ -12,5 +12,6 @@ UrbanCode Deploy Designer : http://$IPADDRESS:$MY_UCDP_HTTP_PORT/landscaper ucdp
 "
 printf "ssh root@%s password is $MY_OS_PASSWORD" "$IPADDRESS"
 
-echo "${normal}##########################################################################################"
+echo "${normal}"
+echo "##########################################################################################"
 
