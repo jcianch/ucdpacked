@@ -41,24 +41,29 @@ Vagrant.configure(2) do |config|
 SCRIPT
 
     env_upgrade = ENV['UPGRADE']
-    env_osonly = ENV['OSONLY']
+    env_openstack = ENV['OPENSTACK']
+    env_setup = ENV['SETUP']
+    env_ucd=ENV['UCD']
     if env_upgrade.nil?
-      print "Provisioning everything"
-      stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
-      stackinabox.vm.provision "shell", name: "setup networking", privileged: true, keep_color: false, path: "networks.sh"
-      stackinabox.vm.provision :reload
-      stackinabox.vm.provision "shell", name: "yum update", privileged: true,   inline: "yum update -y"
-      stackinabox.vm.provision :reload
-      stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
-      stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
-      if env_osonly.nil?
-        stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
-        stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
-        stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
-        stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
-        stackinabox.vm.provision "shell", name: "add JKE app to UCD", privileged: true, keep_color: false, path: "addJKE.sh"
-        stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "addUCDwUCD.sh"
-        stackinabox.vm.provision "shell", name: "add MobileFirst app to UCD", privileged: true, keep_color: false, path: "addMobileFirst.sh"
+      if !env_setup.nil?
+        stackinabox.vm.provision "shell", inline: $fix_vmware_tools_script
+        stackinabox.vm.provision "shell", name: "setup networking", privileged: true, keep_color: false, path: "networks.sh"
+        stackinabox.vm.provision :reload
+        stackinabox.vm.provision "shell", name: "yum update", privileged: true,   inline: "yum update -y"
+        stackinabox.vm.provision :reload
+      end
+      if !env_openstack.nil?
+        stackinabox.vm.provision "shell", name: "run PackStack", privileged: true, keep_color: false, path: "packstack.sh"
+        stackinabox.vm.provision "shell", name: "post install config", privileged: true, keep_color: false, path: "openstack-config.sh"
+      end  
+      if !env_ucd.nil?
+          stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
+          stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
+          stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
+          stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
+          stackinabox.vm.provision "shell", name: "add JKE app to UCD", privileged: true, keep_color: false, path: "addJKE.sh"
+          # stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "addUCDwUCD.sh"
+          # stackinabox.vm.provision "shell", name: "add MobileFirst app to UCD", privileged: true, keep_color: false, path: "addMobileFirst.sh"
       end
     else
       if env_upgrade.include? "UCD"
