@@ -57,12 +57,12 @@ cirrosid=`nova image-list | grep cirros | awk '{ print $2}'`
 #nova image-meta $cirrosid set hw_qemu_guest_agent=yes
 #add a centos 6 image
 glance image-create --name centos6x64 --disk-format qcow2 --container-format bare --file $MEDIA_DIR/osimages/CentOS-6-x86_64-GenericCloud.qcow2 --is-public True --progress --human-readable
-#imageid=`nova image-list | grep centos6x64 | awk '{ print $2}'`
-#nova image-meta $imageid set hw_qemu_guest_agent=yes
+imageid=`nova image-list | grep centos6x64 | awk '{ print $2}'`
+nova image-meta $imageid set hw_qemu_guest_agent=yes
 #add a Ubuntu 14 04 image
 glance image-create --name ubuntu1404x64 --disk-format qcow2 --container-format bare --file $MEDIA_DIR/osimages/trusty-server-cloudimg-amd64-disk1.img --is-public True --progress --human-readable
-#imageid=`nova image-list | grep ubuntu1404x64 | awk '{ print $2}'`
-#nova image-meta $imageid set hw_qemu_guest_agent=yes
+imageid=`nova image-list | grep ubuntu1404x64 | awk '{ print $2}'`
+nova image-meta $imageid set hw_qemu_guest_agent=yes
 
 nova keypair-add admin_key > $BASE_DIR/admin_key.priv
 cp $BASE_DIR/admin_key.priv /home/vagrant/admin_key.priv
