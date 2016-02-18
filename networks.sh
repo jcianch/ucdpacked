@@ -3,7 +3,7 @@ source /vagrant/parameters.sh
 echo setting password to ${MY_OS_PASSWORD}
 echo "${MY_OS_PASSWORD}" | passwd "vagrant" --stdin
 echo "${MY_OS_PASSWORD}" | passwd "root" --stdin
-
+yum install -y deltarpm
 yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-kilo/rdo-release-kilo-1.noarch.rpm
 yum install -y openvswitch 
 
@@ -48,7 +48,7 @@ nameserver $MY_DNS1
 nameserver $MY_DNS2
 EOF
 #Centos 7 vagrant image has ens33 as eth1. Not required
-echo "device ens33" > /etc/sysconfig/network-scripts/ifcfg-ens33
+rm -f /etc/sysconfig/network-scripts/ifcfg-ens33
 
 # Update host configuration
 hostname "${MY_HOSTNAME}"
