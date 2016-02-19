@@ -2,24 +2,17 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  #config.ssh.host = "172.19.21.130"
-  if Vagrant.has_plugin?("vagrant-cachier")
-     config.cache.scope = :box # cache at the base box level
-
-     # setup yum cache
-     config.cache.enable :yum
-  else
-     print "vagrant-cachier plugin has not been found."
-     print "You can install it by `vagrant plugin install vagrant-cachier`"
-  end
   if !Vagrant.has_plugin?("vagrant-reload")
      abort("vagrant-reload plugin has not been found. You can install it by `vagrant plugin install vagrant-reload`")
   end
 
   config.vm.define "stackinabox" do |stackinabox|
 
-    # boxes at https://atlas.hashicorp.com/search.
-    stackinabox.vm.box = "puppetlabs/centos-7.0-64-nocm"#
+    # Freddys updated box with 260GB drive
+    #
+    stackinabox.vm.box = "freddy-centos7"
+    # This is the original box from
+    #stackinabox.vm.box = "puppetlabs/centos-7.0-64-nocm"#
     stackinabox.vm.hostname = "stackinabox"
     vmware = "vmware_workstation"
     stackinabox.vm.provider vmware do |vw|
