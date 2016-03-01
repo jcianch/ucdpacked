@@ -194,18 +194,15 @@ curl -u ucdpadmin:ucdpadmin  -H 'Content-Type: application/json' -d @cloudAuthor
 http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/${TEAM_ID//\"} -X PUT -o cloudAuthorisation.rsp
 
 
-cp $MEDIA_DIR/scripts/tunnel.sh /home/vagrant
-chmod 755 /home/vagrant/tunnel.sh
-chown vagrant:vagrant /home/vagrant/tunnel.sh
+cp $BASE_DIR/scripts/tunnel.sh /root
+chmod 755 /root/tunnel.sh
 
-cp $MEDIA_DIR/scripts/aws-setup.sh /home/vagrant/aws-setup.sh
-chmod 755 /home/vagrant/aws-setup.sh
-chown vagrant:vagrant /home/vagrant/aws-setup.sh
+cp $BASE_DIR/scripts/aws-setup.sh /root/aws-setup.sh
+chmod 755 /root/aws-setup.sh
 
-cp $MEDIA_DIR/scripts/sl-setup.sh /home/vagrant/sl-setup.sh
-chmod 755 /home/vagrant/sl-setup.sh
-chown vagrant:vagrant /home/vagrant/sl-setup.sh
-sleep 60
+cp $BASE_DIR/scripts/sl-setup.sh /root/sl-setup.sh
+chmod 755 /root/sl-setup.sh
+sleep 20
 
 # Add tutorial content to image
 #cp $MEDIA_DIR/landscaper/tutorials/jke.js /opt/ibm-ucd-patterns/opt/tomcat/webapps/landscaper/static/6.*/js/tutorial/nls/TutorialContent.js

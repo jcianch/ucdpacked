@@ -7,7 +7,14 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "stackinabox" do |stackinabox|
-
+  if Vagrant.has_plugin?("vagrant-cachier")
+     config.cache.scope = :box # cache at the base box level
+   # setup yum cache
+     config.cache.enable :yum
+  else
+     print "vagrant-cachier plugin has not been found."
+     print "You can install it by `vagrant plugin install vagrant-cachier`"
+  end
     # Freddys updated box with 260GB drive
     #
     stackinabox.vm.box = "freddy-centos7"
@@ -53,6 +60,7 @@ SCRIPT
           stackinabox.vm.provision "shell", name: "extend engine", privileged: true, keep_color: false, path: "extend-engine.sh"
           stackinabox.vm.provision "shell", name: "install RLKS", privileged: true, keep_color: false, path: "install-rlks.sh"
           stackinabox.vm.provision "shell", name: "install UCD", privileged: true, keep_color: false, path: "install-ucd.sh"
+          stackinabox.vm.provision "shell", name: "install UCD agent relay", privileged: true, keep_color: false, path: "scripts/agent-relay-setup.sh"
           stackinabox.vm.provision "shell", name: "install Designer", privileged: true, keep_color: false, path: "install-designer.sh"
           stackinabox.vm.provision "shell", name: "add JKE app to UCD", privileged: true, keep_color: false, path: "addJKE.sh"
           # stackinabox.vm.provision "shell", name: "add UCDwUCD app to UCD", privileged: true, keep_color: false, path: "addUCDwUCD.sh"
