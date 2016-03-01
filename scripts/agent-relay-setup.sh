@@ -17,9 +17,10 @@ unzip -q -o ./agent-relay.zip -d /tmp
 rm -f agent-relay.zip
 
 cd /tmp/agent-relay-install
+export PATH=$PATH:$JAVA_HOME/bin
 echo "/opt/ibm/agentrelay
 Y
-/etc/alternatives/jre
+${JAVA_HOME}
 agent-relay
 0.0.0.0
 20080
