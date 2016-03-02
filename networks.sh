@@ -69,6 +69,9 @@ echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 echo "net.ipv4.conf.all.rp_filter=0" >> /etc/sysctl.conf
 echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
 sysctl -p
+
+echo "\
+ClientAliveInterval 5" | tee -a /etc/ssh/sshd_config
 #TODO The Centos 7 vagrant image has ens32 as eth0. Change as needed
 iptables -t nat -A POSTROUTING -o ens32 -j MASQUERADE
 iptables -t nat -A POSTROUTING -o br-ex -j MASQUERADE
