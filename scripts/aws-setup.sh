@@ -1,6 +1,5 @@
 #!/bin/bash
-export IPADDRESS=`/sbin/ifconfig br-ex | grep "inet " | awk -F\  '{print $2}' | awk '{print $1}'`
-echo ${IPADDRESS}
+source /vagrant/parameters.sh
 
 mkdir -p ~/.aws
 rm -f ~/.aws/config
@@ -124,7 +123,7 @@ rm -f .ssh/ucdp-demo-key.pem
 # create key-pair to use for ssh into instances in pubic/private subnets
 aws ec2 create-key-pair --key-name ucdp-demo-key --query 'KeyMaterial' --output text > ucdp-demo-key.pem
 chmod 400 ucdp-demo-key.pem
-mv ucdp-demo-key.pem .ssh/
+mv ucdp-demo-key.pem /root/.ssh/
 
 # find the "default" VPC for the account
 export VPC_ID=`aws ec2 describe-vpcs | grep VpcId | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
@@ -169,32 +168,52 @@ fi
 
 # create a new Agent Relay host in the vpc
 export UCD_AGENT_RELAY_INSTANCE_ID=`aws ec2 run-instances --image-id $UBUNTU_TRUSTY_AMI --count 1 --instance-type t2.micro --key-name ucdp-demo-key --security-group-ids $UCD_AGENT_RELAY_SG_ID --subnet-id $SUBNET_ID --monitoring 'Enabled=true' | grep InstanceId | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
+#create shutdown script
+rm -f ./aws-shutdown.sh
+cat >> ./aws-shutdown.sh <<EOF
+#!/bin/bash
 
-# sleep 240s to give time for instance to boot
-echo "waiting for Agent Relay instance to boot on AWS in VPC $VPC_ID..."
+# terminates the UCD Agent Relay on AWS
+# this script is dynamically created everytime you run './aws-setup.sh' and
+# cannot be used to shutdown anything other than the instance that was started
+# with the last execution of the './aws-setup.sh' script
+echo "waiting for Agent Relay instance to shutdown on AWS in VPC $VPC_ID..."
 echo "(this will take a few minutes please be patient)"
-i=0
-while [ $i -lt 240 ]
+AWS_STATUS=""
+aws ec2 terminate-instances --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID &>>aws-shutdown.log
+AWS_STATUS=\`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --include-all-instances --query 'InstanceStatuses[0].[InstanceState]' | grep Name \`
+while [[ "\$AWS_STATUS" != *terminated* ]]
 do
-  sleep 10
-  AWS_STATUS=`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --query 'InstanceStatuses[0].[InstanceStatus]' | grep Status | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
-  if [[ "$AWS_STATUS" == "ok" ]]; then
-    i=300
-    aws ec2 create-tags --resources $UCD_AGENT_RELAY_INSTANCE_ID --tags Key=Name,Value=ucdp-agent-relay
-  fi
-  i=$[$i+10]
-  printf "."
+ sleep 30
+ AWS_STATUS=\`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --include-all-instances --query 'InstanceStatuses[0].[InstanceState]' | grep Name \`
+ echo \$AWS_STATUS
 done
-echo "done"
+echo "done termination"
+
+EOF
+
+chmod 755 ./aws-shutdown.sh
+
+echo "waiting for Agent Relay instance $UCD_AGENT_RELAY_INSTANCE_ID to boot on AWS in VPC $VPC_ID..."
+echo "(this will take a few minutes please be patient)"
+AWS_STATUS=`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --query 'InstanceStatuses[0].[InstanceStatus]' | grep Status `
+while [[ "$AWS_STATUS" != *ok* ]]
+do
+  sleep 30
+  AWS_STATUS=`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --query 'InstanceStatuses[0].[InstanceStatus]' | grep Status `
+  echo $AWS_STATUS
+done
+echo "done. Creating tag for instance name"
+aws ec2 create-tags --resources $UCD_AGENT_RELAY_INSTANCE_ID --tags Key=Name,Value=ucdp-agent-relay
 
 # look up the public dns name of the Agent Relay host
 export UCD_AGENT_RELAY_PUBLIC_HOST=`aws ec2 describe-instances --filters "Name=instance-id,Values=$UCD_AGENT_RELAY_INSTANCE_ID" | grep PublicIpAddress | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
 export UCD_AGENT_RELAY_PRIVATE_HOST=`aws ec2 describe-instances --filters "Name=instance-id,Values=$UCD_AGENT_RELAY_INSTANCE_ID" | grep PrivateIpAddress | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
 
-# create ssh tunnel remote tunnel (forward Agent Relay ports 20080,7916 to this vm on ports 8081,7918)
-./tunnel.sh .ssh/ucdp-demo-key.pem $UCD_AGENT_RELAY_PUBLIC_HOST $UCD_AGENT_RELAY_PRIVATE_HOST &>aws-setup.log
+echo creating ssh remote tunnel ...
+./tunnel.sh /root/.ssh/ucdp-demo-key.pem $UCD_AGENT_RELAY_PUBLIC_HOST $UCD_AGENT_RELAY_PRIVATE_HOST
 
-# create Amazon EC2 Cloud Provider in UCDP
+echo creating Amazon EC2 Cloud Provider in UCDP
 
 wget -q http://stedolan.github.io/jq/download/linux64/jq
 chmod 755 jq
@@ -218,7 +237,7 @@ if [[ "$EC2_CLOUD_PROVIDER_ID" == "" ]]; then
     "properties": [
       {
         "name": "url",
-        "value": "http://${IPADDRESS}:5000/v2.0/",
+        "value": "http://${IPADDRESS}:5000/v2.0",
         "secure": false
       },{
         "name": "timeoutMins",
@@ -250,14 +269,14 @@ http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/cloudproject/ | pyt
 "import json; import sys;
 data=json.load(sys.stdin);
 for index in range(len(data)):
-  if data[index]['displayName'] == 'demo@Amazon EC2':
+  if data[index]['displayName'] == 'admin@Amazon EC2':
     print data[index]['id']"`
 
 if [[ "$EC2_CLOUD_PROJECT_ID" == "" ]]; then
   rm -f ./amazon-cloud-project.json
   cat >> ./amazon-cloud-project.json <<EOF
   {
-    "name": "demo",
+    "name": "admin",
     "cloudProviderId": "$EC2_CLOUD_PROVIDER_ID",
     "properties": [
       {
@@ -266,7 +285,7 @@ if [[ "$EC2_CLOUD_PROJECT_ID" == "" ]]; then
         "secure": false
       },{
         "name": "functionalPassword",
-        "value": "vagrant",
+        "value": "${MY_OS_PASSWORD}",
         "secure": true
       },{
         "name": "accessId",
@@ -292,32 +311,7 @@ EOF
 fi
 
 echo "EC2_CLOUD_PROJECT_ID: $EC2_CLOUD_PROJECT_ID" >> aws-setup.log
-
-rm -f ./add-amazon-cloud-project-to-dev-team.json
-cat >> ./add-amazon-cloud-project-to-dev-team.json <<EOF
-{
-  "name": "Development",
-  "roleMappings": [
-    {
-      "user": "00000000-0000-0000-0000-000000000011",
-      "role": "00000000-0000-0000-0000-000000000301"
-    },{
-      "user": "00000000-0000-0000-0000-000000000012",
-     "role": "00000000-0000-0000-0000-000000000301"
-    }
-  ],
-  "resources": [],
-  "cloud_projects": [
-    "00000000-0000-0000-9999-000000000003",
-    "$EC2_CLOUD_PROJECT_ID"
-  ]
-}
-EOF
-
-curl -s -u ucdpadmin:ucdpadmin \
-     -H 'Content-Type: */*' \
-     -d @add-amazon-cloud-project-to-dev-team.json \
-     http://${IPADDRESS}:${MY_UCDP_HTTP_PORT}/landscaper/security/team/00000000-0000-0000-0000-000000000207 -X PUT &>add-amazon-cloud-project-to-dev-team.log
+echo Done. Please add the Amazon EC2 project to your team in the Designer UI
 
 echo "REGION: $AWS_REGION" >> aws-setup.log
 echo "VPC: $VPC_ID" >> aws-setup.log
@@ -326,33 +320,6 @@ echo "AMI: $UBUNTU_TRUSTY_AMI" >> aws-setup.log
 echo "UCD AGENT RELAY INSTANCE ID: $UCD_AGENT_RELAY_INSTANCE_ID" >> aws-setup.log
 echo "UCD AGENT RELAY PUBLIC HOST: http://$UCD_AGENT_RELAY_PUBLIC_HOST" >> aws-setup.log
 echo "UCD AGENT RELAY PRIVATE HOST: http://$UCD_AGENT_RELAY_PRIVATE_HOST" >> aws-setup.log
-
-rm -f ./aws-shutdown.sh
-cat >> ./aws-shutdown.sh <<EOF
-#!/bin/bash
-
-# terminates the UCD Agent Relay on AWS
-# this script is dynamically created everytime you run './aws-setup.sh' and
-# cannot be used to shutdown anything other than the instance that was started
-# with the last execution of the './aws-setup.sh' script
-echo "waiting for Agent Relay instance to shutdown on AWS in VPC $VPC_ID..."
-echo "(this will take a few minutes please be patient)"
-aws ec2 terminate-instances --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID &>>aws-shutdown.log
-i=0
-while [ $i -lt 240 ]
-do
-  sleep 10
-  AWS_STATUS=`aws ec2 describe-instance-status --instance-ids $UCD_AGENT_RELAY_INSTANCE_ID --query 'InstanceStatuses[0].[InstanceStatus]' | grep Status | head -1 | awk '{gsub(/\"/, "");gsub(/,/,""); print $2}'`
-  if [[ "$AWS_STATUS" == "terminated" ]]; then
-    i=300
-  fi
-  i=$[$i+10]
-  printf "."
-done
-echo "done"
-EOF
-
-chmod 755 ./aws-shutdown.sh
 
 echo " "
 echo " "
