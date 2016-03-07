@@ -1,0 +1,12 @@
+Unit]
+Description=UrbanCode Release
+After=network.target
+
+[Service]
+Type=simple
+Environment='JAVA_HOME="/opt/IBM/UCRelease/server/jre"' 'CATALINA_OPTS="-Dlog4j.info -Dlog4j.configuration=log4j.properties"'
+User=root
+ExecStart=/opt/IBM/UCRelease/server/tomcat/bin/catalina.sh run
+
+[Install]
+WantedBy=multi-user.target

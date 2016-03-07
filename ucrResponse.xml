@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<agent-input>
+  <variables>
+    <variable name='sharedLocation' value='/opt/IBM/IBMIMShared'/>
+  </variables>
+  <server>
+    <repository location='/vagrant/media/6.2.0.2/UCR-linux-x86_64/disk1'/>
+  </server>
+  <profile id='IBM UrbanCode Platform' installLocation='/opt/IBM/UCRelease'>
+    <data key='cic.selector.arch' value='x86_64'/>
+    <data key='user.com.ibm.urbancode.prereq.timestamp' value='20160307-1020-51'/>
+    <data key='user.com.ibm.urbancode.urelease.default.language,com.ibm.urbancode.urelease' value='en_US'/>
+    <data key='user.com.ibm.urbancode.NoAppServer.WebApps.WarName,com.ibm.urbancode.urelease' value='ROOT'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.install,com.ibm.urbancode.urelease' value='true'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.fips,com.ibm.urbancode.urelease' value='false'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.shutdown.port,com.ibm.urbancode.urelease' value='11005'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.ssl,com.ibm.urbancode.urelease' value='false'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.host,com.ibm.urbancode.urelease' value='172.19.21.134'/>
+    <data key='user.com.ibm.urbancode.NoAppServer.WebApps.InstallLocation,com.ibm.urbancode.urelease' value='/opt/IBM/UCRelease/server/tomcat/webapps/'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.bin,com.ibm.urbancode.urelease' value='/opt/IBM/UCRelease/server/tomcat/bin/'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.port,com.ibm.urbancode.urelease' value='11080'/>
+    <data key='user.com.ibm.urbancode.appserver.tomcat.port.https,com.ibm.urbancode.urelease' value='11443'/>
+    <data key='user.com.ibm.urbancode.release.license.server,com.ibm.urbancode.urelease' value='27000@localhost'/>
+    <data key='user.com.ibm.urbancode.urelease.mail.smtp.secure,com.ibm.urbancode.urelease' value='false'/>
+    <data key='user.com.ibm.urbancode.db.url,com.ibm.urbancode.urelease' value='jdbc:mysql://localhost:3306/ibm_ucr'/>
+    <data key='user.com.ibm.urbancode.db.install.database.type,com.ibm.urbancode.urelease' value='mysql'/>
+    <data key='user.com.ibm.urbancode.db.username,com.ibm.urbancode.urelease' value='ibm_ucr'/>
+    <data key='user.com.ibm.urbancode.db.password,com.ibm.urbancode.urelease' value='ibm_ucr'/>
+    <data key='user.com.ibm.urbancode.db.connection,com.ibm.urbancode.urelease' value='testing'/>
+    <data key='user.com.ibm.urbancode.db.install,com.ibm.urbancode.urelease' value='Y'/>
+    <data key='user.com.ibm.urbancode.jdbc.jar,com.ibm.urbancode.urelease' value='/vagrant/media/dbjar/mariadb-java-client-1.2.3.jar'/>
+    <data key='user.com.ibm.urbancode.db.driver,com.ibm.urbancode.urelease' value='org.mariadb.jdbc.Driver'/>
+  </profile>
+  <install>
+    <!-- IBM UrbanCode Release 6.2 -->
+    <offering profile='IBM UrbanCode Platform' id='com.ibm.urbancode.urelease' version='6.2.0.UCRELO62-I20151229_1210' features='main.feature'/>
+  </install>
+  <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
+  <preference name='offering.service.repositories.areUsed' value='false'/>
+  <preference name='com.ibm.cic.common.core.preferences.preserveDownloadedArtifacts' value='false'/>
+</agent-input>
