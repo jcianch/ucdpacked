@@ -34,3 +34,6 @@ systemctl enable ucr.service
 echo "Starting the ucr Server..."
 systemctl start ucr.service
 
+#TODO
+# add UCD plugin and integrate
+#import assets?
