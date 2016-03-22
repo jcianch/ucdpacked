@@ -39,7 +39,7 @@ Vagrant.configure(2) do |config|
     sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
     sed -i 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
 SCRIPT
-
+    env_cleanup = ENV['CLEANUP']
     env_upgrade = ENV['UPGRADE']
     env_openstack = ENV['OPENSTACK']
     env_setup = ENV['SETUP']
@@ -80,7 +80,11 @@ SCRIPT
         stackinabox.vm.provision "shell", name: "upgrade Designer", privileged: true, keep_color: false, path: "upgrade-designer.sh"
       end
     end
-    stackinabox.vm.provision :reload
+    if !env_cleanup.nil?
+      stackinabox.vm.provision "shell", name: "zero disk", privileged: true,   inline: "dd if=/dev/zero of=/EMPTY bs=1M"
+      stackinabox.vm.provision "shell", name: "zero disk", privileged: true,   inline: "rm -f /EMPTY"
+    end    
+    #stackinabox.vm.provision :reload
     stackinabox.vm.provision "shell", name: "All Done", privileged: true, keep_color: false, path: "alldone.sh"
 
   end
